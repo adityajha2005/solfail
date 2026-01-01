@@ -1,0 +1,19 @@
+{
+  "input": {
+    "transactionBase64": "base64EncodedTransaction"
+  },
+  "expectedOutput": {
+    "status": "SIMULATION_OK",
+    "note": "No failure detected during simulation."
+  },
+  "simulation": {
+    "error": null,
+    "logs": [
+      "Program 11111111111111111111111111111111 invoke [1]",
+      "Program 11111111111111111111111111111111 success"
+    ],
+    "unitsConsumed": 5000
+  }
+}
+
+

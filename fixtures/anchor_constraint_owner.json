@@ -1,0 +1,33 @@
+{
+  "input": {
+    "instructions": [
+      {
+        "programId": "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS",
+        "accounts": ["Account1", "Account2"],
+        "data": "base64Data"
+      }
+    ],
+    "network": "devnet"
+  },
+  "expectedOutput": {
+    "status": "FAILURE_DETECTED",
+    "failureCategory": "anchor_constraint_owner",
+    "confidence": "high",
+    "explanation": "Anchor constraint violation: account owner does not match expected program.",
+    "likelyFix": "Verify the account is owned by the correct program or initialize it properly.",
+    "matchedBy": "logPattern",
+    "mappingSource": "core"
+  },
+  "simulation": {
+    "error": {
+      "InstructionError": [0, ["Custom", 6001]]
+    },
+    "logs": [
+      "Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]",
+      "Program log: AnchorError thrown in program/src/lib.rs:42. Error Code: ConstraintOwner. Error Number: 6001. Error Message: A constraint was violated.",
+      "Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS failed: custom program error: 0x1771"
+    ]
+  }
+}
+
+

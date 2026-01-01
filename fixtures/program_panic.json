@@ -1,0 +1,27 @@
+{
+  "input": {
+    "transactionBase64": "base64EncodedTransaction"
+  },
+  "expectedOutput": {
+    "status": "FAILURE_DETECTED",
+    "failureCategory": "program_panic",
+    "confidence": "high",
+    "explanation": "Program execution panicked, typically due to assertion failure or invalid state.",
+    "likelyFix": "Review program logic and ensure all preconditions are met before execution.",
+    "matchedBy": "logPattern",
+    "mappingSource": "core"
+  },
+  "simulation": {
+    "error": {
+      "InstructionError": [0, ["Custom", 1]]
+    },
+    "logs": [
+      "Program 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU invoke [1]",
+      "Program log: Instruction: Withdraw",
+      "Program log: panicked at 'assertion failed: amount <= balance', program/src/lib.rs:156:5",
+      "Program 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU failed: custom program error: 0x1"
+    ]
+  }
+}
+
+

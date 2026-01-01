@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "description": "Real failed transaction from Solana devnet - Program Panic",
+    "signature": "2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU",
+    "network": "devnet",
+    "source": "Real blockchain transaction fetched from Solana RPC",
+    "verified": true,
+    "date": "2024"
+  },
+  "input": {
+    "transactionBase64": "AT7Ffhx5JGAUOp8HKs4nHAbZqAyHYE2nAF9j5Hi8djgqLwo+lzHIIJxKwC0DLCPGMb6EgDP8FIHlr3E6Z9S1/gkBAAgNC3AWSePHsFNdCL0v8pGHdEDmaq2r/fN92mA7ZuMS4gpU6FI9WzoLJyNtibMKva3By3X/68c8rDG119IChcMzk2vKinixtq0v0djypOXsZT2KCnt2PNcFYYNjnbIrFx3Xd6fjMDSS9IwBepLJyRP/oBcYLerJ5rwwgsN9YfcmmO7oO0CVyL2tyMV/PjCsjXIMG5pbe7D0CSxy3gDbcnh0jAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABN+teWL/sd2SXQqftebQDOYZW6i7OpH9B++YYMXpe7gFgXD/AeaMAXoF7Jol8HeB4aGuT5hXq7IGXUnmSQSXngan1RcYe9FmNdrUBFX9wsDBJMaPIVZ1pdu6y18IAAAAmIPIii/XvhfRiikWQLvN9NB0ICEkkPTvMHOJmXk9AxGhXNLxg+l6LWjByJzBy59n9aCSPFu50hceTih7PplBZdCX2Cp03WYcqUoQFOAOxKESRdDKPQlsIOQaSshprBQH4wo6Kq2KROQXYcxcMmyUvjPOm6momuVUKFc/y+vqEN60RGaFGM1EZyCiGAaNcJOOmnD3Sevd9plVu8HS4UR6vwQLCgAKBwMCAQQJBQhbC+Aq7ACaSqNNOdWmA5Z5BtNyFjb2mXVY4wo6Kq2KROQXYcxcMmyUvjPOm6momuVUKFc/y+vqEN4BAunpSF/GactpZpiYpKUYHPbMf1HS5U6QMl2PSZNnNRD/AAwGCwkHAgMICTkWkAA9NdpuAQYBAAwGAAAJ02jpAAAAAAQGAQAMBgAAM55p6QAAAAAF",
+    "network": "devnet",
+    "strongMode": true
+  },
+  "expectedOutput": {
+    "status": "FAILURE_DETECTED",
+    "failureCategory": "program_panic",
+    "confidence": "high",
+    "explanation": "Program execution panicked, typically due to assertion failure or invalid state.",
+    "likelyFix": "Review program logic and ensure all preconditions are met before execution.",
+    "rawError": "{\"InstructionError\":[0,{\"Custom\":6204}]}",
+    "matchedBy": "logPattern",
+    "mappingSource": "core",
+    "confidenceScore": 70
+  },
+  "simulation": {
+    "error": {
+      "InstructionError": [0, {"Custom": 6204}]
+    },
+    "logs": [
+      "Program log: panicked at",
+      "Program log: custom program error"
+    ],
+    "unitsConsumed": null
+  },
+  "notes": {
+    "verification": "This is a real transaction from Solana devnet. The decoder correctly identified it as a program_panic with high confidence.",
+    "explorer": "https://explorer.solana.com/tx/2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU?cluster=devnet",
+    "rawErrorCode": "Custom:6204",
+    "matchMethod": "Matched by log pattern containing 'panicked' - most reliable matching method"
+  }
+}
+
+

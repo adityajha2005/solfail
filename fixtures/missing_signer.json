@@ -1,0 +1,27 @@
+{
+  "input": {
+    "transactionBase64": "base64EncodedTransaction"
+  },
+  "expectedOutput": {
+    "status": "FAILURE_DETECTED",
+    "failureCategory": "missing_signer",
+    "confidence": "high",
+    "explanation": "A required signer account was not included when submitting the transaction.",
+    "likelyFix": "Ensure the missing account signs the transaction before sending.",
+    "matchedBy": "errorMessage",
+    "mappingSource": "core"
+  },
+  "simulation": {
+    "error": {
+      "InstructionError": [0, ["MissingRequiredSignature", {}]]
+    },
+    "logs": [
+      "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [1]",
+      "Program log: Instruction: Transfer",
+      "Program log: Error: Missing required signature",
+      "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA failed: Missing required signature"
+    ]
+  }
+}
+
+

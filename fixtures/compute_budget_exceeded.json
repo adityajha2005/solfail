@@ -1,0 +1,27 @@
+{
+  "input": {
+    "transactionBase64": "base64EncodedTransaction"
+  },
+  "expectedOutput": {
+    "status": "FAILURE_DETECTED",
+    "failureCategory": "compute_budget_exceeded",
+    "confidence": "high",
+    "explanation": "Transaction exceeded the compute unit limit allocated for execution.",
+    "likelyFix": "Reduce transaction complexity or increase compute budget limit.",
+    "matchedBy": "logPattern",
+    "mappingSource": "core"
+  },
+  "simulation": {
+    "error": {
+      "InstructionError": [0, ["ComputationalBudgetExceeded", {}]]
+    },
+    "logs": [
+      "Program log: Instruction #0",
+      "Program log: consumed 200000 of 200000 compute units",
+      "Program log: Compute budget exceeded, please reduce the number of instructions or the complexity of the transaction"
+    ],
+    "unitsConsumed": 200000
+  }
+}
+
+
