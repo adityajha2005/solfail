@@ -20,7 +20,15 @@ npm install -g solfail
 import { decodeTransactionFailure } from 'solfail';
 import type { DecodeRequest, DecodeResponse } from 'solfail';
 
+// Option 1: Using signature (fetches from RPC)
 const result = await decodeTransactionFailure({
+  signature: '2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU',
+  network: 'devnet',
+  strongMode: true
+});
+
+// Option 2: Using base64 transaction
+const result2 = await decodeTransactionFailure({
   transactionBase64: txBase64,
   network: 'devnet',
   strongMode: true
@@ -38,6 +46,9 @@ if (result.status === 'FAILURE_DETECTED') {
 **Best for:** Development, debugging, scripts
 
 ```bash
+# Using signature (fetches from RPC)
+echo '{"signature":"2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU","network":"devnet"}' | solfail decode --devnet
+
 # After global install
 solfail decode tx.json --devnet
 
@@ -56,7 +67,12 @@ solfail decode tx.json | jq '.failureCategory'
 # Start server
 npm start
 
-# Call from any language
+# Using signature (fetches from RPC)
+curl -X POST http://localhost:3000/decode \
+  -H "Content-Type: application/json" \
+  -d '{"signature": "2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU", "network": "devnet"}'
+
+# Or using base64 transaction
 curl -X POST http://localhost:3000/decode \
   -H "Content-Type: application/json" \
   -d '{"transactionBase64": "...", "network": "devnet"}'

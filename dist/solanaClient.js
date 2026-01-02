@@ -1,8 +1,68 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.fetchTransactionBySignature = fetchTransactionBySignature;
 exports.simulateTransaction = simulateTransaction;
 exports.extractErrorDetails = extractErrorDetails;
 const web3_js_1 = require("@solana/web3.js");
+async function fetchTransactionBySignature(rpcUrl, signature, timeoutMs = 30000) {
+    const connection = new web3_js_1.Connection(rpcUrl, "confirmed");
+    const fetchPromise = connection.getTransaction(signature, {
+        maxSupportedTransactionVersion: 0,
+        commitment: "confirmed",
+    });
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout: Failed to fetch transaction")), timeoutMs));
+    let tx;
+    try {
+        tx = await Promise.race([fetchPromise, timeoutPromise]);
+    }
+    catch (error) {
+        if (error.message?.includes("Timeout")) {
+            throw error;
+        }
+        if (error.message?.includes("ECONNREFUSED") || error.message?.includes("ENOTFOUND")) {
+            throw new Error("Failed to fetch transaction: RPC endpoint unreachable");
+        }
+        throw new Error(`Failed to fetch transaction: ${error.message || "Transaction not found"}`);
+    }
+    if (!tx || !tx.transaction) {
+        throw new Error("Transaction not found or invalid");
+    }
+    let transactionBase64;
+    if (tx.transaction instanceof web3_js_1.Transaction) {
+        const serialized = tx.transaction.serialize({ requireAllSignatures: false });
+        transactionBase64 = Buffer.from(serialized).toString("base64");
+    }
+    else if (tx.transaction instanceof web3_js_1.VersionedTransaction) {
+        const serialized = tx.transaction.serialize();
+        transactionBase64 = Buffer.from(serialized).toString("base64");
+    }
+    else if (tx.transaction && typeof tx.transaction === "object" && "message" in tx.transaction) {
+        try {
+            const versionedTx = new web3_js_1.VersionedTransaction(tx.transaction.message, Array.isArray(tx.transaction.signatures)
+                ? tx.transaction.signatures.map((sig) => {
+                    if (sig instanceof Uint8Array && sig.length === 64) {
+                        return sig;
+                    }
+                    else if (typeof sig === "string") {
+                        const bs58 = require("bs58");
+                        return bs58.decode(sig);
+                    }
+                    else {
+                        throw new Error(`Invalid signature format: expected Uint8Array[64] or base58 string, got ${typeof sig}`);
+                    }
+                })
+                : []);
+            transactionBase64 = Buffer.from(versionedTx.serialize()).toString("base64");
+        }
+        catch (error) {
+            throw new Error(`Failed to reconstruct versioned transaction: ${error.message}`);
+        }
+    }
+    else {
+        throw new Error("Transaction not found or invalid");
+    }
+    return transactionBase64;
+}
 async function simulateTransaction(rpcUrl, transactionBase64, instructions, timeoutMs = 30000) {
     const connection = new web3_js_1.Connection(rpcUrl, "confirmed");
     let transaction;

@@ -4,7 +4,7 @@ import {
   FailureCategory,
   Confidence,
 } from "./types";
-import { simulateTransaction, extractErrorDetails } from "./solanaClient";
+import { simulateTransaction, extractErrorDetails, fetchTransactionBySignature } from "./solanaClient";
 import { findMatchingError, scoreToConfidence } from "./errorMappings";
 import { getRpcUrl } from "./rpcConfig";
 import { detectSimulationLimitations } from "./simulationWarnings";
@@ -19,9 +19,15 @@ export async function decodeTransactionFailure(
   const rpcUrl = getRpcUrl(network);
   const strongMode = request.strongMode ?? STRONG_MODE;
 
+  let transactionBase64 = request.transactionBase64;
+
+  if (request.signature) {
+    transactionBase64 = await fetchTransactionBySignature(rpcUrl, request.signature, timeoutMs);
+  }
+
   const simulation = await simulateTransaction(
     rpcUrl,
-    request.transactionBase64,
+    transactionBase64,
     request.instructions,
     timeoutMs
   );

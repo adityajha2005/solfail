@@ -17,6 +17,7 @@ export type Status = "SIMULATION_OK" | "FAILURE_DETECTED";
 export type Network = "mainnet-beta" | "testnet" | "devnet";
 
 export interface DecodeRequest {
+  signature?: string;
   transactionBase64?: string;
   instructions?: Array<{
     programId: string;

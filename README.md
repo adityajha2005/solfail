@@ -48,7 +48,10 @@ if (result.status === 'FAILURE_DETECTED') {
 ### Option 2: CLI Tool (Developer Workflow)
 
 ```bash
-# After global install
+# Using signature (fetches from RPC)
+echo '{"signature":"2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU","network":"devnet"}' | solfail decode --devnet
+
+# Using transaction file
 solfail decode tx.json --devnet
 
 # Or with npx (no install needed)
@@ -71,6 +74,12 @@ node dist/index.js
 Then call from any language:
 
 ```bash
+# Using transaction signature (fetches from RPC automatically)
+curl -X POST http://localhost:3000/decode \
+  -H "Content-Type: application/json" \
+  -d '{"signature": "2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU", "network": "devnet"}'
+
+# Or using base64 transaction
 curl -X POST http://localhost:3000/decode \
   -H "Content-Type: application/json" \
   -d '{"transactionBase64": "YOUR_FAILED_TX_BASE64", "network": "devnet"}'
@@ -135,21 +144,9 @@ import { decodeTransactionFailure } from 'solfail';
 import { Connection } from '@solana/web3.js';
 
 async function onTransactionError(signature: string, connection: Connection) {
-  // Fetch failed transaction
-  const tx = await connection.getTransaction(signature, {
-    maxSupportedTransactionVersion: 0
-  });
-  
-  if (!tx?.transaction) return;
-  
-  // Serialize to base64
-  const txBase64 = Buffer.from(
-    tx.transaction.serialize({ requireAllSignatures: false })
-  ).toString('base64');
-  
-  // Decode failure
+  // Decode failure directly from signature (fetches transaction automatically)
   const decoded = await decodeTransactionFailure({
-    transactionBase64: txBase64,
+    signature: signature,
     network: 'mainnet-beta'
   });
   
@@ -401,14 +398,22 @@ npm run cli -- -f tx.json | jq '.failureCategory'
 #### Option 1: Transaction Base64
 
 ```bash
-# Mainnet (default)
+# Using signature (fetches from RPC automatically)
+curl -X POST http://localhost:3000/decode \
+  -H "Content-Type: application/json" \
+  -d '{
+    "signature": "2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU",
+    "network": "devnet"
+  }'
+
+# Using base64 transaction (mainnet - default)
 curl -X POST http://localhost:3000/decode \
   -H "Content-Type: application/json" \
   -d '{
     "transactionBase64": "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEDArj..."
   }'
 
-# Devnet
+# Using base64 transaction (devnet)
 curl -X POST http://localhost:3000/decode \
   -H "Content-Type: application/json" \
   -d '{

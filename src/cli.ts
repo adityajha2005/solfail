@@ -99,6 +99,7 @@ Environment Variables:
 
 Input Format:
   JSON with either:
+    - signature: string (transaction signature - will fetch from RPC)
     - transactionBase64: string
     - instructions: array of {programId, accounts, data}
     - network: "mainnet-beta" | "testnet" | "devnet" (optional)
@@ -109,6 +110,9 @@ Examples:
 
   # From file (devnet with strong mode)
   solfail decode tx.json --devnet --strong
+
+  # Using signature (fetches from RPC)
+  echo '{"signature":"2Fnq3DTWf7wQcYCMCbV7L5z9Nxxrvh8kFgTfohmB3z59uyRV4HdmhvNq7AqrWNLhYpvk2kTqJ7dFwPXgkrvk2PUU","network":"devnet"}' | solfail decode
 
   # Pipe input
   cat tx.json | solfail decode | jq '.failureCategory'

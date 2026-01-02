@@ -5,6 +5,7 @@ export interface SimulationResult {
     logs: string[];
     unitsConsumed?: number;
 }
+export declare function fetchTransactionBySignature(rpcUrl: string, signature: string, timeoutMs?: number): Promise<string>;
 export declare function simulateTransaction(rpcUrl: string, transactionBase64?: string, instructions?: Array<{
     programId: string;
     accounts: string[];

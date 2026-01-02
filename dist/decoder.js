@@ -10,7 +10,11 @@ async function decodeTransactionFailure(request, timeoutMs = 30000) {
     const network = request.network || "mainnet-beta";
     const rpcUrl = (0, rpcConfig_1.getRpcUrl)(network);
     const strongMode = request.strongMode ?? STRONG_MODE;
-    const simulation = await (0, solanaClient_1.simulateTransaction)(rpcUrl, request.transactionBase64, request.instructions, timeoutMs);
+    let transactionBase64 = request.transactionBase64;
+    if (request.signature) {
+        transactionBase64 = await (0, solanaClient_1.fetchTransactionBySignature)(rpcUrl, request.signature, timeoutMs);
+    }
+    const simulation = await (0, solanaClient_1.simulateTransaction)(rpcUrl, transactionBase64, request.instructions, timeoutMs);
     if (!simulation.error) {
         return {
             status: "SIMULATION_OK",

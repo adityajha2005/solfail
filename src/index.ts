@@ -24,9 +24,9 @@ app.post("/decode", async (req: Request, res: Response) => {
   try {
     const body = req.body as DecodeRequest;
 
-    if (!body.transactionBase64 && !body.instructions) {
+    if (!body.signature && !body.transactionBase64 && !body.instructions) {
       return res.status(400).json({
-        error: "Either transactionBase64 or instructions must be provided",
+        error: "Either signature, transactionBase64, or instructions must be provided",
       });
     }
 
