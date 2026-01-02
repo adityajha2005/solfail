@@ -17,12 +17,15 @@ async function fetchTransactionBySignature(rpcUrl, signature, timeoutMs = 30000)
     }
     catch (error) {
         if (error.message?.includes("Timeout")) {
-            throw error;
+            throw new Error(`Failed to fetch transaction: RPC request timed out after ${timeoutMs}ms. The transaction may not exist or the RPC endpoint may be slow.`);
         }
         if (error.message?.includes("ECONNREFUSED") || error.message?.includes("ENOTFOUND")) {
-            throw new Error("Failed to fetch transaction: RPC endpoint unreachable");
+            throw new Error(`Failed to fetch transaction: RPC endpoint unreachable (${rpcUrl}). Check your network connection.`);
         }
-        throw new Error(`Failed to fetch transaction: ${error.message || "Transaction not found"}`);
+        if (error.message?.includes("fetch failed")) {
+            throw new Error(`Failed to fetch transaction: Network error connecting to RPC (${rpcUrl}). The transaction may not exist on this network or the RPC endpoint may be unavailable.`);
+        }
+        throw new Error(`Failed to fetch transaction: ${error.message || "Transaction not found or RPC error"}`);
     }
     if (!tx || !tx.transaction) {
         throw new Error("Transaction not found or invalid");
