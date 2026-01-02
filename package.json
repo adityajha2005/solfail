@@ -1,6 +1,6 @@
 {
   "name": "solfail",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Minimal Solana transaction failure decoder - Decode transaction failures with clear explanations and actionable fixes",
   "main": "dist/lib.js",
   "types": "dist/lib.d.ts",
