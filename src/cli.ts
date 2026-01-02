@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
 import { DecodeRequest, Network } from "./types";
+import { decodeTransactionFailure } from "./decoder";
 import * as fs from "fs";
 
-const API_URL = process.env.API_URL || "http://localhost:3000";
+const API_URL = process.env.API_URL;
+const USE_API = process.env.USE_API === "true" || !!API_URL;
 
 async function readStdin(): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -95,7 +97,8 @@ Options:
   -h,  --help            Show this help message
 
 Environment Variables:
-  API_URL                 API endpoint URL (default: http://localhost:3000)
+  API_URL                 API endpoint URL (if set, CLI will call API instead of decoding locally)
+  USE_API                  Set to "true" to force API mode (default: false - uses local decoder)
 
 Input Format:
   JSON with either:
@@ -169,21 +172,27 @@ async function main() {
       request.strongMode = true;
     }
 
-    const response = await fetch(`${API_URL}/decode`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
-    });
+    let result;
+    if (USE_API) {
+      const apiUrl = API_URL || "http://localhost:3000";
+      const response = await fetch(`${apiUrl}/decode`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }));
-      const errorMsg = typeof errorData === "object" && errorData !== null && "error" in errorData
-        ? String(errorData.error)
-        : `HTTP ${response.status}: ${response.statusText}`;
-      throw new Error(errorMsg);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: response.statusText }));
+        const errorMsg = typeof errorData === "object" && errorData !== null && "error" in errorData
+          ? String(errorData.error)
+          : `HTTP ${response.status}: ${response.statusText}`;
+        throw new Error(errorMsg);
+      }
+
+      result = await response.json();
+    } else {
+      result = await decodeTransactionFailure(request);
     }
-
-    const result = await response.json();
 
     if (json || pretty) {
       console.log(JSON.stringify(result, null, pretty ? 2 : 0));
