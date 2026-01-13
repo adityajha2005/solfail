@@ -10,3 +10,8 @@ export type {
   Status,
 } from './types';
 
+// v2: Failure Intelligence exports
+export { getAggregationManager } from './aggregation';
+export type { FailureAggregation } from './aggregation';
+export { generateFailureHash } from './fingerprint';
+

@@ -41,6 +41,11 @@ export interface DecodeResponse {
   confidenceScore?: number;
   note?: string;
   mappingSource?: "core" | "community";
+  // v2 Failure Intelligence fields
+  failureHash?: string;
+  firstSeen?: string;
+  seenCount?: number;
+  lastSeen?: string;
 }
 
 export interface ErrorMapping {

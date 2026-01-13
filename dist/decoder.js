@@ -5,6 +5,8 @@ const solanaClient_1 = require("./solanaClient");
 const errorMappings_1 = require("./errorMappings");
 const rpcConfig_1 = require("./rpcConfig");
 const simulationWarnings_1 = require("./simulationWarnings");
+const fingerprint_1 = require("./fingerprint");
+const aggregation_1 = require("./aggregation");
 const STRONG_MODE = process.env.STRONG_MODE === "true" || process.env.STRONG_MODE === "1";
 async function decodeTransactionFailure(request, timeoutMs = 30000) {
     const network = request.network || "mainnet-beta";
@@ -28,6 +30,11 @@ async function decodeTransactionFailure(request, timeoutMs = 30000) {
     const matchResult = (0, errorMappings_1.findMatchingError)(errorCode, errorMessage, logs);
     if (matchResult) {
         const confidence = (0, errorMappings_1.scoreToConfidence)(matchResult.confidenceScore);
+        // Generate failure fingerprint/hash
+        const failureHash = (0, fingerprint_1.generateFailureHash)(matchResult.mapping.category, errorCode, errorMessage);
+        // Record failure and get aggregation data
+        const aggregationManager = (0, aggregation_1.getAggregationManager)();
+        const aggregation = aggregationManager.recordFailure(failureHash, matchResult.mapping.category);
         const response = {
             status: "FAILURE_DETECTED",
             failureCategory: matchResult.mapping.category,
@@ -37,6 +44,11 @@ async function decodeTransactionFailure(request, timeoutMs = 30000) {
             rawError,
             matchedBy: matchResult.matchedBy,
             mappingSource: matchResult.mapping.source,
+            // v2 Failure Intelligence
+            failureHash: aggregation.failureHash,
+            firstSeen: aggregation.firstSeen,
+            seenCount: aggregation.seenCount,
+            lastSeen: aggregation.lastSeen,
         };
         if (strongMode) {
             response.confidenceScore = matchResult.confidenceScore;
@@ -46,6 +58,11 @@ async function decodeTransactionFailure(request, timeoutMs = 30000) {
         }
         return response;
     }
+    // Generate failure hash even for unknown errors
+    const failureHash = (0, fingerprint_1.generateFailureHash)("unknown", errorCode, errorMessage);
+    // Record failure and get aggregation data
+    const aggregationManager = (0, aggregation_1.getAggregationManager)();
+    const aggregation = aggregationManager.recordFailure(failureHash, "unknown");
     const response = {
         status: "FAILURE_DETECTED",
         failureCategory: "unknown",
@@ -54,6 +71,11 @@ async function decodeTransactionFailure(request, timeoutMs = 30000) {
         likelyFix: "Review the rawError field and program logs for detailed failure information.",
         rawError,
         matchedBy: "fallback",
+        // v2 Failure Intelligence
+        failureHash: aggregation.failureHash,
+        firstSeen: aggregation.firstSeen,
+        seenCount: aggregation.seenCount,
+        lastSeen: aggregation.lastSeen,
     };
     if (strongMode) {
         response.confidenceScore = 0;

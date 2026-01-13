@@ -3,8 +3,10 @@ node_modules/
 *.log
 .DS_Store
 
-# Internal deployment docs (not for OSS)
 DEPLOY.md
 PUBLISHING.md
 USAGE.md
 
+# v2 Failure Intelligence - Aggregation Data
+.solfail-aggregation.json
+.dist

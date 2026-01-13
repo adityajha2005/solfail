@@ -79,6 +79,17 @@ app.post("/decode", async (req: Request, res: Response) => {
 
     const result = await decodeTransactionFailure(body, RPC_TIMEOUT_MS);
 
+    // v2: Add failure intelligence headers
+    if (result.status === 'FAILURE_DETECTED' && result.failureHash) {
+      res.set('X-Solfail-Hash', result.failureHash);
+      if (result.seenCount !== undefined) {
+        res.set('X-Solfail-Seen-Count', result.seenCount.toString());
+      }
+      if (result.failureCategory) {
+        res.set('X-Solfail-Category', result.failureCategory);
+      }
+    }
+
     res.json(result);
   } catch (error: any) {
     if (error.message?.includes("timeout") || error.message?.includes("Timeout")) {

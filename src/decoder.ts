@@ -8,6 +8,8 @@ import { simulateTransaction, extractErrorDetails, fetchTransactionBySignature }
 import { findMatchingError, scoreToConfidence } from "./errorMappings";
 import { getRpcUrl } from "./rpcConfig";
 import { detectSimulationLimitations } from "./simulationWarnings";
+import { generateFailureHash } from "./fingerprint";
+import { getAggregationManager } from "./aggregation";
 
 const STRONG_MODE = process.env.STRONG_MODE === "true" || process.env.STRONG_MODE === "1";
 
@@ -56,6 +58,20 @@ export async function decodeTransactionFailure(
   if (matchResult) {
     const confidence = scoreToConfidence(matchResult.confidenceScore);
     
+    // Generate failure fingerprint/hash
+    const failureHash = generateFailureHash(
+      matchResult.mapping.category,
+      errorCode,
+      errorMessage
+    );
+
+    // Record failure and get aggregation data
+    const aggregationManager = getAggregationManager();
+    const aggregation = aggregationManager.recordFailure(
+      failureHash,
+      matchResult.mapping.category
+    );
+    
     const response: DecodeResponse = {
       status: "FAILURE_DETECTED",
       failureCategory: matchResult.mapping.category,
@@ -65,6 +81,11 @@ export async function decodeTransactionFailure(
       rawError,
       matchedBy: matchResult.matchedBy,
       mappingSource: matchResult.mapping.source,
+      // v2 Failure Intelligence
+      failureHash: aggregation.failureHash,
+      firstSeen: aggregation.firstSeen,
+      seenCount: aggregation.seenCount,
+      lastSeen: aggregation.lastSeen,
     };
 
     if (strongMode) {
@@ -78,6 +99,13 @@ export async function decodeTransactionFailure(
     return response;
   }
 
+  // Generate failure hash even for unknown errors
+  const failureHash = generateFailureHash("unknown", errorCode, errorMessage);
+  
+  // Record failure and get aggregation data
+  const aggregationManager = getAggregationManager();
+  const aggregation = aggregationManager.recordFailure(failureHash, "unknown");
+
   const response: DecodeResponse = {
     status: "FAILURE_DETECTED",
     failureCategory: "unknown",
@@ -86,6 +114,11 @@ export async function decodeTransactionFailure(
     likelyFix: "Review the rawError field and program logs for detailed failure information.",
     rawError,
     matchedBy: "fallback",
+    // v2 Failure Intelligence
+    failureHash: aggregation.failureHash,
+    firstSeen: aggregation.firstSeen,
+    seenCount: aggregation.seenCount,
+    lastSeen: aggregation.lastSeen,
   };
 
   if (strongMode) {

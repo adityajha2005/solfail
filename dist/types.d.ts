@@ -25,6 +25,10 @@ export interface DecodeResponse {
     confidenceScore?: number;
     note?: string;
     mappingSource?: "core" | "community";
+    failureHash?: string;
+    firstSeen?: string;
+    seenCount?: number;
+    lastSeen?: string;
 }
 export interface ErrorMapping {
     category: FailureCategory;
