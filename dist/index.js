@@ -5,9 +5,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const decoder_1 = require("./decoder");
+const aggregation_1 = require("./aggregation");
 const app = (0, express_1.default)();
 const MAX_REQUEST_SIZE = process.env.MAX_REQUEST_SIZE || "1mb";
 const RPC_TIMEOUT_MS = parseInt(process.env.RPC_TIMEOUT_MS || "30000", 10);
+// Serve static files for web UI
+app.use(express_1.default.static("public"));
+// Serve index.html for root route
+app.get("/", (_req, res) => {
+    res.sendFile("index.html", { root: "public" });
+});
 app.use(express_1.default.json({ limit: MAX_REQUEST_SIZE }));
 app.use((err, req, res, next) => {
     if (err instanceof SyntaxError && "body" in err) {
@@ -98,6 +105,26 @@ app.post("/decode", async (req, res) => {
 });
 app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
+});
+// v2: Analytics endpoint
+app.get("/api/analytics", (_req, res) => {
+    try {
+        const manager = (0, aggregation_1.getAggregationManager)();
+        const topFailures = manager.getTopFailures(10);
+        const allFailures = manager.getAllAggregations();
+        const totalOccurrences = allFailures.reduce((sum, f) => sum + f.seenCount, 0);
+        res.json({
+            topFailures,
+            totalUniqueErrors: allFailures.length,
+            totalOccurrences,
+            allFailures: allFailures.sort((a, b) => b.seenCount - a.seenCount)
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            error: error.message || "Internal server error",
+        });
+    }
 });
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -217,11 +217,58 @@ async function main() {
         else {
             result = await (0, decoder_1.decodeTransactionFailure)(request);
         }
+        // Helper colors (no extra deps)
+        const red = (s) => `\x1b[31m${s}\x1b[0m`;
+        const green = (s) => `\x1b[32m${s}\x1b[0m`;
+        const cyan = (s) => `\x1b[36m${s}\x1b[0m`;
+        const yellow = (s) => `\x1b[33m${s}\x1b[0m`;
+        const dim = (s) => `\x1b[2m${s}\x1b[0m`;
         if (json || pretty) {
             console.log(JSON.stringify(result, null, pretty ? 2 : 0));
         }
         else {
-            console.log(JSON.stringify(result, null, 2));
+            // Human-friendly view
+            if (result.status === "SIMULATION_OK") {
+                console.log(`\n${green("=== SIMULATION OK ===")}`);
+                console.log("No failure detected during simulation.\n");
+            }
+            else {
+                console.log(`\n${red("=== FAILURE DETECTED ===")}`);
+                const lines = [];
+                lines.push(`Category   : ${result.failureCategory || "unknown"}`);
+                lines.push(`Confidence : ${result.confidence || "N/A"}`);
+                if (result.failureHash)
+                    lines.push(`Hash       : ${result.failureHash}`);
+                if (typeof result.seenCount === "number")
+                    lines.push(`Seen Count : ${result.seenCount}`);
+                if (result.firstSeen)
+                    lines.push(`First Seen : ${result.firstSeen}`);
+                if (result.lastSeen)
+                    lines.push(`Last Seen  : ${result.lastSeen}`);
+                console.log(lines.join("\n"));
+                console.log(`\n${cyan("Explanation:")}`);
+                console.log(result.explanation || "N/A");
+                console.log(`\n${cyan("Likely Fix:")}`);
+                console.log(result.likelyFix || "N/A");
+                console.log(`\n${cyan("Details:")}`);
+                console.log(`  matchedBy     : ${result.matchedBy || "N/A"}`);
+                console.log(`  mappingSource : ${result.mappingSource || "N/A"}`);
+                if (typeof result.confidenceScore === "number") {
+                    console.log(`  score         : ${result.confidenceScore}`);
+                }
+                if (result.rawError) {
+                    console.log(`\n${yellow("Raw Error:")}`);
+                    console.log(dim(JSON.stringify((() => {
+                        try {
+                            return JSON.parse(result.rawError);
+                        }
+                        catch {
+                            return result.rawError;
+                        }
+                    })(), null, 2)));
+                }
+                console.log("");
+            }
         }
     }
     catch (error) {

@@ -1,11 +1,20 @@
 import express, { Request, Response } from "express";
 import { DecodeRequest, Network } from "./types";
 import { decodeTransactionFailure } from "./decoder";
+import { getAggregationManager } from "./aggregation";
 
 const app = express();
 
 const MAX_REQUEST_SIZE = process.env.MAX_REQUEST_SIZE || "1mb";
 const RPC_TIMEOUT_MS = parseInt(process.env.RPC_TIMEOUT_MS || "30000", 10);
+
+// Serve static files for web UI
+app.use(express.static("public"));
+
+// Serve index.html for root route
+app.get("/", (_req: Request, res: Response) => {
+    res.sendFile("index.html", { root: "public" });
+});
 
 app.use(express.json({ limit: MAX_REQUEST_SIZE }));
 
@@ -112,6 +121,28 @@ app.post("/decode", async (req: Request, res: Response) => {
 
 app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
+});
+
+// v2: Analytics endpoint
+app.get("/api/analytics", (_req: Request, res: Response) => {
+  try {
+    const manager = getAggregationManager();
+    const topFailures = manager.getTopFailures(10);
+    const allFailures = manager.getAllAggregations();
+    
+    const totalOccurrences = allFailures.reduce((sum, f) => sum + f.seenCount, 0);
+    
+    res.json({
+      topFailures,
+      totalUniqueErrors: allFailures.length,
+      totalOccurrences,
+      allFailures: allFailures.sort((a, b) => b.seenCount - a.seenCount)
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      error: error.message || "Internal server error",
+    });
+  }
 });
 
 app.listen(PORT, () => {

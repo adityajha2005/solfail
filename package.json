@@ -1,6 +1,6 @@
 {
   "name": "solfail",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Solana transaction failure intelligence - Decode, track, and aggregate transaction failures with clear explanations and actionable fixes",
   "main": "dist/lib.js",
   "types": "dist/lib.d.ts",
