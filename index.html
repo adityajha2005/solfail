@@ -11,16 +11,16 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg: #071014;
-        --bg-elevated: rgba(10, 20, 26, 0.82);
-        --panel: rgba(13, 24, 31, 0.88);
-        --panel-strong: rgba(18, 31, 40, 0.96);
-        --text: #f4fbff;
-        --muted: #98aab3;
-        --line: rgba(130, 175, 194, 0.16);
-        --brand: #66d9ff;
-        --brand-strong: #28c7ff;
-        --accent: #8bffb1;
+        --bg: #050505;
+        --bg-elevated: rgba(8, 8, 8, 0.9);
+        --panel: rgba(12, 12, 12, 0.92);
+        --panel-strong: rgba(18, 18, 18, 0.98);
+        --text: #f5f5f5;
+        --muted: #b7b7b7;
+        --line: rgba(255, 255, 255, 0.12);
+        --brand: #ffffff;
+        --brand-strong: #d9d9d9;
+        --accent: #cfcfcf;
         --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
         --max: 1120px;
       }
@@ -28,16 +28,16 @@
       @media (prefers-color-scheme: light) {
         :root {
           color-scheme: light;
-          --bg: #f4f9fc;
-          --bg-elevated: rgba(255, 255, 255, 0.85);
+          --bg: #f7f7f7;
+          --bg-elevated: rgba(255, 255, 255, 0.9);
           --panel: rgba(255, 255, 255, 0.92);
           --panel-strong: rgba(255, 255, 255, 0.98);
-          --text: #0b1820;
-          --muted: #56707c;
-          --line: rgba(17, 47, 61, 0.12);
-          --brand: #006d90;
-          --brand-strong: #008db8;
-          --accent: #0f9f53;
+          --text: #0b0b0b;
+          --muted: #5f5f5f;
+          --line: rgba(0, 0, 0, 0.12);
+          --brand: #111111;
+          --brand-strong: #2a2a2a;
+          --accent: #4a4a4a;
           --shadow: 0 24px 80px rgba(14, 36, 48, 0.12);
         }
       }
@@ -54,9 +54,9 @@
         margin: 0;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         background:
-          radial-gradient(circle at top left, rgba(40, 199, 255, 0.15), transparent 26%),
-          radial-gradient(circle at top right, rgba(139, 255, 177, 0.08), transparent 24%),
-          linear-gradient(180deg, var(--bg) 0%, #04090c 100%);
+          radial-gradient(circle at top left, rgba(255, 255, 255, 0.08), transparent 24%),
+          radial-gradient(circle at top right, rgba(255, 255, 255, 0.04), transparent 24%),
+          linear-gradient(180deg, var(--bg) 0%, #000000 100%);
         color: var(--text);
       }
 
@@ -90,17 +90,8 @@
       .brand {
         display: flex;
         align-items: center;
-        gap: 12px;
         font-weight: 800;
         letter-spacing: 0.08em;
-      }
-
-      .brand-mark {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, var(--brand), var(--accent));
-        box-shadow: 0 10px 26px rgba(40, 199, 255, 0.28);
       }
 
       .nav-links {
@@ -120,7 +111,7 @@
       }
 
       .pill.primary {
-        background: linear-gradient(135deg, rgba(40, 199, 255, 0.16), rgba(139, 255, 177, 0.12));
+        background: rgba(255, 255, 255, 0.1);
         color: var(--text);
       }
 
@@ -149,7 +140,7 @@
         gap: 8px;
         padding: 8px 12px;
         border-radius: 999px;
-        background: rgba(102, 217, 255, 0.12);
+        background: rgba(255, 255, 255, 0.08);
         color: var(--brand);
         font-size: 0.9rem;
         font-weight: 700;
@@ -201,9 +192,9 @@
       }
 
       .button.primary {
-        background: linear-gradient(135deg, var(--brand), var(--brand-strong));
-        color: #041117;
-        border-color: transparent;
+        background: var(--text);
+        color: #050505;
+        border-color: var(--text);
       }
 
       .hero-art {
@@ -253,8 +244,8 @@
         padding: 18px;
         border-radius: 18px;
         border: 1px solid var(--line);
-        background: #020608;
-        color: #ddf7ff;
+        background: #000000;
+        color: #f3f3f3;
         line-height: 1.55;
       }
 
@@ -293,7 +284,7 @@
         padding: 20px;
         border-radius: 18px;
         border: 1px solid var(--line);
-        background: linear-gradient(135deg, rgba(40, 199, 255, 0.1), rgba(139, 255, 177, 0.05));
+        background: rgba(255, 255, 255, 0.03);
       }
 
       .video strong {
@@ -361,7 +352,6 @@
     <header class="nav">
       <div class="shell nav-inner">
         <a class="brand" href="#top" aria-label="SOLFAIL home">
-          <span class="brand-mark" aria-hidden="true"></span>
           <span>SOLFAIL</span>
         </a>
         <nav class="nav-links" aria-label="Primary">
