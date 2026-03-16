@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLFAIL</title>
+    <meta
+      name="description"
+      content="Decode Solana transaction failures into clear explanations and actionable fixes."
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #071014;
+        --bg-elevated: rgba(10, 20, 26, 0.82);
+        --panel: rgba(13, 24, 31, 0.88);
+        --panel-strong: rgba(18, 31, 40, 0.96);
+        --text: #f4fbff;
+        --muted: #98aab3;
+        --line: rgba(130, 175, 194, 0.16);
+        --brand: #66d9ff;
+        --brand-strong: #28c7ff;
+        --accent: #8bffb1;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+        --max: 1120px;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          color-scheme: light;
+          --bg: #f4f9fc;
+          --bg-elevated: rgba(255, 255, 255, 0.85);
+          --panel: rgba(255, 255, 255, 0.92);
+          --panel-strong: rgba(255, 255, 255, 0.98);
+          --text: #0b1820;
+          --muted: #56707c;
+          --line: rgba(17, 47, 61, 0.12);
+          --brand: #006d90;
+          --brand-strong: #008db8;
+          --accent: #0f9f53;
+          --shadow: 0 24px 80px rgba(14, 36, 48, 0.12);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(40, 199, 255, 0.15), transparent 26%),
+          radial-gradient(circle at top right, rgba(139, 255, 177, 0.08), transparent 24%),
+          linear-gradient(180deg, var(--bg) 0%, #04090c 100%);
+        color: var(--text);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .shell {
+        width: min(calc(100% - 32px), var(--max));
+        margin: 0 auto;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(18px);
+        background: var(--bg-elevated);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 72px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+      }
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--brand), var(--accent));
+        box-shadow: 0 10px 26px rgba(40, 199, 255, 0.28);
+      }
+
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .pill {
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .pill.primary {
+        background: linear-gradient(135deg, rgba(40, 199, 255, 0.16), rgba(139, 255, 177, 0.12));
+        color: var(--text);
+      }
+
+      .hero {
+        padding: 56px 0 40px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 28px;
+        align-items: center;
+      }
+
+      .hero-copy {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 36px;
+        box-shadow: var(--shadow);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(102, 217, 255, 0.12);
+        color: var(--brand);
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+      }
+
+      h1 {
+        margin: 18px 0 14px;
+        font-size: clamp(3rem, 9vw, 5.5rem);
+        line-height: 0.94;
+        letter-spacing: -0.06em;
+      }
+
+      .tagline {
+        margin: 0;
+        font-size: clamp(1.05rem, 2vw, 1.35rem);
+        line-height: 1.7;
+        color: var(--muted);
+        max-width: 58ch;
+      }
+
+      .badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 22px 0 0;
+      }
+
+      .badges img {
+        height: 28px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 13px 18px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: var(--panel-strong);
+        font-weight: 700;
+      }
+
+      .button.primary {
+        background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+        color: #041117;
+        border-color: transparent;
+      }
+
+      .hero-art {
+        overflow: hidden;
+        border-radius: 28px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-art img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .section {
+        padding: 18px 0 34px;
+      }
+
+      .section-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 28px;
+      }
+
+      .section h2 {
+        margin: 0 0 14px;
+        font-size: 1.8rem;
+      }
+
+      .section p {
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: #020608;
+        color: #ddf7ff;
+        line-height: 1.55;
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      .flow {
+        display: grid;
+        gap: 8px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.02);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      .list {
+        display: grid;
+        gap: 12px;
+        padding: 0;
+        margin: 18px 0 0;
+        list-style: none;
+      }
+
+      .list li {
+        padding: 16px 18px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .video {
+        display: block;
+        margin-top: 18px;
+        padding: 20px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: linear-gradient(135deg, rgba(40, 199, 255, 0.1), rgba(139, 255, 177, 0.05));
+      }
+
+      .video strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 1.05rem;
+      }
+
+      .footer {
+        padding: 18px 0 48px;
+      }
+
+      .footer-card {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+      }
+
+      .footer-card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      @media (max-width: 920px) {
+        .hero-grid,
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+
+        .nav-inner {
+          padding: 14px 0;
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .shell {
+          width: min(calc(100% - 20px), var(--max));
+        }
+
+        .hero {
+          padding-top: 28px;
+        }
+
+        .hero-copy,
+        .section-card {
+          padding: 20px;
+          border-radius: 20px;
+        }
+
+        .nav-links {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="shell nav-inner">
+        <a class="brand" href="#top" aria-label="SOLFAIL home">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>SOLFAIL</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a class="pill" href="https://x.com/adxtyahq/status/2006973981493178435?s=20">Demo Video</a>
+          <a class="pill primary" href="https://bags.fm/8gvrtcQWZ3FgDgxTQrioMSUDrYQUj6BVS5ThYTN6BAGS">Token CA</a>
+          <a class="pill" href="https://www.npmjs.com/package/solfail">npm</a>
+          <a class="pill" href="./README.md">Docs</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top" class="shell">
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">Solana failure intelligence</span>
+            <h1>SOLFAIL</h1>
+            <p class="tagline">
+              Decode Solana transaction failures into clear explanations and actionable fixes.
+            </p>
+            <div class="badges" aria-label="Project badges">
+              <a href="https://www.npmjs.com/package/solfail">
+                <img alt="npm version" src="https://img.shields.io/npm/v/solfail" />
+              </a>
+              <a href="https://www.npmjs.com/package/solfail">
+                <img alt="npm downloads" src="https://img.shields.io/npm/dm/solfail" />
+              </a>
+              <a href="./LICENSE">
+                <img alt="license" src="https://img.shields.io/npm/l/solfail" />
+              </a>
+            </div>
+            <div class="hero-actions">
+              <a class="button primary" href="https://x.com/adxtyahq/status/2006973981493178435?s=20">Watch Demo</a>
+              <a class="button" href="./README.md">Open Full README</a>
+            </div>
+          </div>
+          <div class="hero-art">
+            <img src="./solfail.png" alt="SOLFAIL banner" />
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid-2">
+          <div class="section-card">
+            <h2>Problem -> Solution</h2>
+            <p>
+              Solana errors are often accurate but still unusable in real product flows. A raw failure like
+              <code>{"InstructionError":[0,["Custom",6001]]}</code> does not help a wallet, a dApp engineer,
+              or an alerting pipeline understand what to do next.
+            </p>
+            <p>
+              Solfail turns those low-level failures into readable categories, plain-English explanations, and
+              practical fixes that teams can pipe into UX, debugging, CI, and monitoring.
+            </p>
+          </div>
+          <div class="section-card">
+            <h2>Quick Example</h2>
+            <pre><code>Input
+{"InstructionError":[0,["Custom",6001]]}
+
+Output
+{
+  "status": "FAILURE_DETECTED",
+  "failureCategory": "anchor_constraint_owner",
+  "confidence": "high",
+  "explanation": "Anchor constraint violation: account owner does not match expected program.",
+  "likelyFix": "Verify the account is owned by the correct program or initialize it properly."
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid-2">
+          <div class="section-card">
+            <h2>CLI Demo</h2>
+            <pre><code>npx solfail decode tx.json --devnet
+
+{
+  "status": "FAILURE_DETECTED",
+  "failureCategory": "missing_signer",
+  "confidence": "high",
+  "explanation": "A required signer account was not included when submitting the transaction.",
+  "likelyFix": "Ensure the missing account signs the transaction before sending."
+}</code></pre>
+          </div>
+          <div class="section-card">
+            <h2>How It Works</h2>
+            <div class="flow">
+              <div>Failed Transaction</div>
+              <div>↓</div>
+              <div>simulateTransaction RPC</div>
+              <div>↓</div>
+              <div>Solfail Parser</div>
+              <div>↓</div>
+              <div>Error Mapping Engine</div>
+              <div>↓</div>
+              <div>Human Explanation + Fix</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid-2">
+          <div class="section-card">
+            <h2>Why Solfail</h2>
+            <ul class="list">
+              <li>Developer productivity through readable error diagnostics instead of raw RPC output.</li>
+              <li>Infra-grade decoding with stable categories that are safe to consume programmatically.</li>
+              <li>CLI + API + library support for different integration surfaces.</li>
+              <li>Multi-network support across devnet, testnet, and mainnet-beta workflows.</li>
+            </ul>
+          </div>
+          <div class="section-card">
+            <h2>Use Cases</h2>
+            <ul class="list">
+              <li>Wallet UX improvements</li>
+              <li>dApp debugging</li>
+              <li>CI/CD transaction validation</li>
+              <li>Blockchain monitoring</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-card">
+          <h2>Demo Video</h2>
+          <p>
+            The live demo is hosted on X and shows the product flow in action.
+          </p>
+          <a class="video" href="https://x.com/adxtyahq/status/2006973981493178435?s=20">
+            <strong>Watch the SOLFAIL demo video on X</strong>
+            <span>See the transaction decoding flow, CLI experience, and product positioning.</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="footer">
+        <div class="footer-card">
+          <p>Full technical documentation, API usage, examples, and configuration live in the README.</p>
+          <a class="button primary" href="./README.md">Open Documentation</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
